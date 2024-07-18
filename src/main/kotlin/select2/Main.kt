@@ -77,6 +77,51 @@ fun main(){
     val user77 = User77(id = 1, age = 99)
     println(user77.toString())
 
+    println(calc(1,2))
+
+    println(printCalcResult(10,20, { num1, num2 -> num1 + num2}))
+    println(printCalcResult(10,20, { num1, num2 -> num1 * num2}))
+
+    // スコープ関数
+    // with,run,let,apply,alsoがある
+
+    // with(thisを省略可能）
+    val list = mutableListOf<Int>()
+    for(i in 1..10){
+        if(i % 2 == 1) list.add(i)
+    }
+
+    val oddNumbers = list.joinToString(separator = " ")
+    println(oddNumbers)
+
+    val oddNumbers2 = with(mutableListOf<Int>()){
+        for(i in 1..10){
+            if(i % 2 == 0) this.add(i)
+        }
+        this.joinToString(separator = " ")
+    }
+
+    println(oddNumbers2)
+
+    // run(thisを省略可能）
+    val oddNUmbers3 = mutableListOf<Int>().run {
+        for(i in 1..10){
+            if(i % 3 == 0) this.add(i)
+        }
+        this.joinToString(separator = " ")
+    }
+    println(oddNUmbers3)
+
+    // let
+    val oddNumbers4 = mutableListOf<Int>().let { list ->
+        for(i in 1..10){
+            if(i % 4 == 0) list.add(i)
+        }
+        list.joinToString(separator = " ")
+    }
+    println(oddNumbers4)
+
+    // 続きはapply7.18
 }
 
 fun printOddOrEventNumberText(num:Int){
@@ -161,4 +206,48 @@ fun printUserInfo(id:Int ,name:String ="Default Name"){
     println("id=$id name=$name")
 }
 
-// 続きは関数型と高階関数 7.17
+// 関数型の定義
+val calc: (Int, Int) -> Int = { num1: Int, num2: Int -> num1 + num2 }
+
+// 引数の方を省略することも可能
+val calc2: (Int, Int) -> Int = { num1 , num2 -> num1 + num2}
+
+// 引数が一つの場合、引数の名前も省略することが可能
+val calc3:(Int) -> Int = { it * it}
+
+// 別な書き方として無名関数の書き方も存在する
+val calc4:(Int) -> Int = fun(num:Int):Int { return num * num}
+
+// 高階関数
+fun printCalcResult(num1: Int, num2:Int, calc:(Int, Int) -> Int):Int{
+    val result = calc(num1,num2)
+    return result
+}
+
+// 型の定義も行うことができる TypeScriptみたい
+typealias Calc = (Int, Int) -> Int
+
+fun printCalcResult2(num1:Int, num2:Int, calc:Calc): Int {
+    val result = calc(num1,num2)
+    return result
+}
+
+// 拡張関数
+//fun square(num:Int):Int = num * num
+//
+//fun Int.square():Int = this * this
+
+
+// スコープ関数 runの応用編
+data class User10(var name: String){
+    fun getUserString(user: User10?, newName:String):String?{
+        return user?.run{
+            name = newName
+            toString()
+        }
+    }
+}
+
+
+
+
