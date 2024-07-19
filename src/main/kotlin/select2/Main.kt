@@ -8,6 +8,31 @@ data class User76(val id:Int,val name:String = "Default Name")
 
 data class User77(val id:Int,val name:String = "Default Name", val age:Int)
 
+data class User88(val id:Int,var name:String,var address:String){
+
+    fun getUser(id:Int):User88{
+        return User88(id, "USer88", "Tokyo")
+    }
+    fun updateUser88(id:Int, newName:String, newAddress:String){
+        val user88 = getUser(id).apply{
+            this.name = newName
+            this.address = newAddress
+        }
+        println(user88)
+    }
+}
+
+data class Num(val value: Int){
+    operator fun plus(num: Num):Num {
+        return Num(value + num.value)
+    }
+    operator fun compareTo(num:Num):Int{
+        return value.compareTo(num.value)
+    }
+}
+
+// 続きは9デリケートで冗長な処理を移譲できるから 7.20
+
 fun main(){
     printOddOrEventNumberText(1)
     printOddOrEventNumberTextKt(2)
@@ -122,6 +147,19 @@ fun main(){
     println(oddNumbers4)
 
     // 続きはapply7.18
+    val oddNumbers5 = mutableListOf<Int>().apply {
+        for(i in 1..10){
+            if(i % 2 == 1)this.add(i)
+        }
+        this.joinToString(separator = " ")
+    }
+    println(oddNumbers5)
+
+    val num = Num(5) + Num(1)
+    println(num)
+
+    val greaterThen = Num(5) > Num(1)
+    println(greaterThen)
 }
 
 fun printOddOrEventNumberText(num:Int){
