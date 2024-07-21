@@ -1,5 +1,7 @@
 package select2
 
+import kotlin.reflect.KProperty
+
 // データクラスの作り方
 data class User7(val id:Int, var name:String)
 
@@ -31,7 +33,82 @@ data class Num(val value: Int){
     }
 }
 
-// 続きは9デリケートで冗長な処理を移譲できるから 7.20
+// デリケートで冗長な処理の委譲
+interface CalculationExceutor {
+    val message: String
+    fun calc(num1:Int, num2:Int):Int
+    fun printStartMessage()
+}
+
+class CommonCalculationExecutor(override val message: String = "calc"):CalculationExceutor{
+    override fun calc(num1: Int, num2: Int): Int {
+        throw IllegalStateException("Not implements calc")
+    }
+
+    override fun printStartMessage() {
+        println("start $message")
+    }
+}
+
+class AddCalulationExecutor(private val calculationEcecutor:CalculationExceutor):CalculationExceutor{
+    override val message:String
+        get() = calculationEcecutor.message
+
+    override fun calc(num1: Int, num2: Int): Int {
+        return num1 + num2
+    }
+
+    override fun printStartMessage() {
+        calculationEcecutor.printStartMessage()
+    }
+}
+
+class AddCalculationExecutorDelegate(private val calculationEcecutor: CalculationExceutor):CalculationExceutor by calculationEcecutor {
+    override  fun calc(num1:Int, num2:Int):Int {
+        return num1 + num2
+    }
+}
+
+class Person{
+    var name:String = ""
+        get() {
+            println("nameを取得します")
+            return field
+        }
+        set(value) {
+            println("nameを更新します")
+            field = value
+        }
+
+    var addres:String = ""
+        get() {
+            println("addressを取得します")
+            return field
+        }
+        set(value) {
+            println("addressを更新します")
+            field = value
+        }
+
+}
+
+class DelegateWithMessage<T>{
+    private var value: T? = null
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>):T{
+        println("${property.name}を取得します")
+        return value!!
+    }
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value:T){
+        println("${property.name}を取得します")
+        this.value = value
+    }
+}
+
+class DelegatePerson{
+    var name:String by DelegateWithMessage()
+    var address: String by DelegateWithMessage()
+}
 
 fun main(){
     printOddOrEventNumberText(1)
@@ -160,6 +237,28 @@ fun main(){
 
     val greaterThen = Num(5) > Num(1)
     println(greaterThen)
+
+    val executor = AddCalulationExecutor(CommonCalculationExecutor())
+    executor.printStartMessage()
+    println(executor.calc(8,11))
+
+    val executorDelegate = AddCalculationExecutorDelegate(CommonCalculationExecutor())
+    executorDelegate.printStartMessage()
+    println(executorDelegate.calc(1,9))
+
+    val person = Person()
+    person.name = "プロパティの委譲"
+    person.addres = "Tokyo"
+    println(person.name)
+    println(person.addres)
+
+
+    val delefatePerson = DelegatePerson()
+    delefatePerson.name = "DelegatePerson"
+    delefatePerson.address = "未開の地"
+    println(delefatePerson.name)
+    println(delefatePerson.address)
+
 }
 
 fun printOddOrEventNumberText(num:Int){
